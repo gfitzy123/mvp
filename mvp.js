@@ -1,76 +1,104 @@
-News = new Mongo.Collection("news");
+links = new Mongo.Collection("links");
 Comments = new Mongo.Collection("comments");
 
+
+Router.route('/users/:username', function() {
+  this.render('userView');
+},{
+    name: 'user'
+});
+
 Router.route('/', function () {
-    this.render('newsList');
+    this.render('linksList');
 },{
-    name:'news.all'
+    name:'links.all'
 });
 
-Router.route('/news/add', function () {
-    this.render('addNews');
+Router.route('/links/add', function () {
+    this.render('addlinks');
 },{
-    name: 'news.add'
+    name: 'links.add'
 });
 
-Router.route('/news/:title', function () {
-    this.render('newsView', {
+Router.route('/links/:title', function () {
+    this.render('linksView', {
         data: function () {
-            return News.findOne({urlTitle: this.params.title});
+            return links.findOne({urlTitle: this.params.title});
         }
     });
 },{
-    name: 'news.single'
+    name: 'links.single'
 });
 
-console.log(Meteor.userID);
 
   Meteor.methods({
-    addNews: function (title,url) {
-        News.insert({
+    addlinks: function (title,url) {
+        links.insert({
+            username: Meteor.user().username,
             title: title,
             url:url,
             urlTitle:title.replace(/\s/g,'-'), //remove spaces
-            dateAdded:new Date()
+            dateAdded: new Date(),
+            moment: function() { return moment().format("ddd, hA") },
         });
     },
-    addComments: function(comment) {
-      console.log(this.userID);
+    addComment: function(comment, userId) {
       Comments.insert({
+        username: Meteor.user().username,
+        owner: userId,
         comment:comment,
-        dateAdded:new Date()
+        dateAdded: new Date(),
+        moment: moment().format("ddd, hA")
       });
-    }
-  });
+    },
+    deleteComment: function(e) {
+      console.log(e)
+      var userId = e.userId;
 
+      Comments.remove(userId)
+      }
+  });
 
 
 if (Meteor.isClient) {
 
-  Template.newsView.helpers({
+
+Template.registerHelper('isCurrentUser', function(owner) {
+  console.log(owner)
+  return owner === Meteor.userId();
+});
+
+
+  Template.linksView.helpers({
     getComments: function() {
-      console.log(Comments.find({},{sort: {dateAdded: -1}}));
         return Comments.find({},{sort: {dateAdded: -1}});
-    }
-
-
+    },
+     isOwner: function() {
+        return this.userId === Meteor.userId();
+    },
   });
 
-  Template.newsView.events({
+
+  Template.linksView.events({
     'submit .addCommentsForm':function(e){
+      if (!Meteor.userId()) {
+        alert("You must log in to leave comments!")
+        return;
+      }
           e.preventDefault();
-          var userId = Meteor.userID()
-          var userId2 = this.userID()
-          console.log(userId, userId2)
+          var userId = Meteor.userId()
           var comments = e.target.comments.value;
-          console.log(comments)
-          Meteor.call('addComments', comments);
-    }
-
+          Meteor.call('addComment', comments, userId);
+    },
+      'click button':function(e) {
+          var userId = e.owner;
+          console.log(userId)
+        Meteor.call('deleteComment', e)
+      }
   });
 
-  Template.addNews.events({
-    'submit .addNewsForm':function(e){
+  Template.addlinks.events({
+    'submit .addlinksForm':function(e){
 
            var title = e.target.title.value;
            var url= e.target.url.value; 
@@ -79,18 +107,21 @@ if (Meteor.isClient) {
                return false;
            }
 
-           Meteor.call('addNews',title,url); 
-           Router.go('news.all');
+           Meteor.call('addlinks',title,url); 
+           Router.go('links.all');
 
            return false;
-       }
+       },
+      'click .badge no-style':function(e){
+
+        Meteor.call('deletelinks')
+      }
     });
- 
-    Template.newsList.helpers({
-        news: function () {
-            return News.find({},{sort: {dateAdded: -1}});
-        }
+
+    Accounts.ui.config({
+      passwordSignupFields: "USERNAME_ONLY",
     });
+
 }
 
 if (Meteor.isServer) {
@@ -98,3 +129,7 @@ if (Meteor.isServer) {
     // code to run on server at startup
   });
 }
+
+//Config accounts to only accept usernames
+
+

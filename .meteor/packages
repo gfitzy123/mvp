@@ -13,3 +13,6 @@ accounts-ui
 accounts-facebook
 accounts-password
 accounts-base
+momentjs:moment
+mrt:moment
+amr:parsley.js

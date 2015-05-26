@@ -6,68 +6,85 @@
     <div class="container">
         <div class="row">
                 <div class="page-header">
-                    <a class="btn btn-success pull-right" href="/news/add" role="button">Add News</a>
+                    <a class="btn btn-success pull-right" href="/links/add" role="button">Add links</a>
                     <h1><a href="/">Garrett's MVP Link Repository Thing!</a></h1>
                 </div>
         </div>
     </div>
+
+            <button class="btn btn-lg btn-primary btn-block" type="submit"> {{>loginButtons}} </button>
+            
 </body>
 
-<template name="newsList">
+<template name="linksList">
     <div class="container">
         <div class="row">
                 <ul class="list-group">
-                    {{#each news}}
-                        {{> newsItem}}
+                    {{#each links}}
+                        {{> linksItem}}
                     {{/each}}
                 </ul>
         </div>
     </div>
 </template>
 
-<template name="newsItem">
+<template name="linksItem">
     <li class="list-group-item">
         <a href="{{url}}" target="_blank">{{title}}</a>
-        <a href="/news/{{urlTitle}}" class="badge no-style">comments</a>
+        <a href="/links/{{urlTitle}}" class="badge no-style">comments</a>
     </li>
 </template>
 
-<template name="newsView">
+<template name="linksView">
     <div class="container">
         <div class="row">
             <h1>{{title}}</h1>
             <hr/>
             <h2>Comments</h2>
-            <p>
+            
             {{#each getComments}}
-                    <ul> {{currentUser.username}} {{comment}} {{dateAdded}} </ul>
+                    <div> 
+                        <a href="/users/{{username}}" id="{{username}}">{{username}}</a> wrote : {{comment}} at <strong> {{moment}} </strong>
+                      <button type="button" id="{{userId}}" class="badge no-style"> delete </button>
+                    </div>
             {{/each}}
-            </p>
-            <form class="addCommentsForm">
-                <input type="text" id="comments" name="comments" placeholder="Leave a comment!"><br/>
-                <input type="submit" value="Leave comment"/>
-            </form>
+                <form class="addCommentsForm">
+                    <input type="text" id="comments" name="comments" placeholder="Leave a comment!"><br/>
+                    <input type="submit" value="Leave comment"/>
+                </form>
         </div>
     </div>
 </template>
 
-<template name="addNews">
+<template name="addlinks">
     <div class="container">
         <div class="row">
-        	<div class="loginButton">
-        		{{>loginButtons}}
-        	</div>
-        		{{#if currentUser}}
+            <div class="loginButton">
+                {{>loginButtons}}
+            </div>
+                {{#if currentUser}}
                 <div class="form">
-                    <form class="addNewsForm">
+                    <form class="addlinksForm">
                         <input type="text" id="title" name="title" placeholder="Enter title"/> <br/>
                         <input type="text" id="url" name="url" placeholder="Enter URL"/> <br/>
                         <input type="submit" value="Add"/>
                     </form>
                 </div>
                 {{else}}
-                	<div>Please login first!</div>
+                    <div>Please login first!</div>
                 {{/if}}
            </div>
         </div>
 </template>
+
+<template name="profiles">
+    <div class="container">
+        <div class="row">
+    </div>
+    </div>
+</template>
+
+
+
+
+
